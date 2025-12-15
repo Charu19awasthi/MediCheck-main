@@ -1,31 +1,39 @@
-import joblib
-import pandas as pd
+import json
 import os
-from flask import session
 from utils.file_ops import append_prediction
 
-model_path = os.path.join("model", "disease_model.pkl")
-model = joblib.load(model_path)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MAP_PATH = os.path.join(BASE_DIR, "exported_db_files", "disease_symptom_mapping.json")
 
-columns_path = os.path.join("model", "symbipredict_2022.csv")
-columns = pd.read_csv(columns_path, nrows=1).drop(columns=["prognosis"]).columns.tolist()
+with open(MAP_PATH, "r") as f:
+    DISEASE_MAP = json.load(f)
 
 
 def predict_disease_from_symptoms(symptom_list, username=None, top_n=3):
     clean_list = [s.strip().lower() for s in symptom_list]
-    input_vector = [1 if col in clean_list else 0 for col in columns]
+    results = []
 
-    if sum(input_vector) == 0:
-        return [("No symptoms found", 1.0)]
+    for disease, symptoms in DISEASE_MAP.items():
+        matched = set(clean_list) & set(symptoms)
 
-    df_input = pd.DataFrame([input_vector], columns=columns)
-    
-    proba = model.predict_proba(df_input)[0]
-    classes = model.classes_
+        if matched:
+            confidence = int((len(matched) / len(symptoms)) * 100)
+            results.append({
+                "disease": disease,
+                "confidence": f"{confidence}%",
+                "matched_symptoms": list(matched)
+            })
 
-    top_predictions = sorted(zip(classes, proba), key=lambda x: x[1], reverse=True)[:top_n]
+    if not results:
+        results.append({
+            "disease": "No matching disease found",
+            "confidence": "0%",
+            "matched_symptoms": []
+        })
+
+    results = sorted(results, key=lambda x: int(x["confidence"][:-1]), reverse=True)
 
     if username:
-        append_prediction(username, clean_list, top_predictions[0][0])
+        append_prediction(username, clean_list, results[0]["disease"])
 
-    return top_predictions
+    return results[:top_n]

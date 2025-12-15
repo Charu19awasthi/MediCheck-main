@@ -1,0 +1,28 @@
+{
+  "Fungal Infection": [
+    "itching",
+    "skin_rash",
+    "nodal_skin_eruptions"
+  ],
+  "Allergy": [
+    "continuous_sneezing",
+    "shivering",
+    "chills"
+  ],
+  "GERD": [
+    "stomach_pain",
+    "acidity",
+    "vomiting"
+  ],
+  "Diabetes": [
+    "fatigue",
+    "weight_loss",
+    "excessive_hunger",
+    "polyuria"
+  ],
+  "Migraine": [
+    "headache",
+    "nausea",
+    "visual_disturbances"
+  ]
+}

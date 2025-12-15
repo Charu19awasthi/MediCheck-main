@@ -4,6 +4,7 @@ from database import init_db
 from config import Config
 import joblib
 
+
 model = joblib.load("model/disease_model.pkl")
 # Initiate databases
 init_db()

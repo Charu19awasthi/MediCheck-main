@@ -34,6 +34,7 @@ def home():
     if request.method == "POST":
         # JS tarafında hidden <input name="symptoms"> olarak gönderilen listeyi alıyoruz
         selected_symptoms = request.form.getlist("symptoms")
+
         predictions = predict_disease_from_symptoms(selected_symptoms, session["username"])
         return render_template("result.html", predictions=predictions, symptoms=selected_symptoms)
 
